@@ -1,63 +1,3 @@
-# 0. 附录-创建前端工程
-
-创建一个新项目的过程:
-
-- step1. 创建一个新文件夹,进入该文件夹
-- step2. 初始化npm项目
-
-```
-npm init -y
-```
-
-- step3. 安装依赖
-
-```
-npm install css-loader style-loader html-webpack-plugin three
-```
-
-- step4. 安装开发依赖
-
-```
-npm install -D webpack webpack-cli webpack-dev-server babel-loader @babel/core @babel/preset-env @types/three
-```
-
-- step5. 将以下2个命令添加到`package.json`的`scripts`字段中
-
-```json
-{
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "webpack --mode=production",
-    "dev": "webpack serve --port=4060 --mode=development"
-  }
-}
-```
-
-- step5. 创建项目结构
-    - 在项目根目录创建src文件夹
-        - 在src文件夹创建index.js
-    - 在项目根目录创建public文件夹
-        - 在public文件夹创建index.html
-    - 在项目根目录创建assets文件夹
-    - 在项目根目录创建webpack.config.js
-
-```
-tree ./ -L 1
-./
-├── assets      // 存放静态资源
-├── node_modules
-├── package-lock.json
-├── package.json
-├── public      // 存放html文件
-├── src         // 存放js文件
-└── webpack.config.js
-
-4 directories, 3 files
-```
-
-- step6. 配置`webpack.config.js`
-
-```javascript
 const path = require("path")
 const HtmlWebpackPlugin = require("html-webpack-plugin")
 
@@ -116,4 +56,3 @@ module.exports = {
         ]
     },
 }
-```

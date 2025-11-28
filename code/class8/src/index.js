@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import '../assets/index.css';
+import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min';
 
 const scene = new THREE.Scene()
 
@@ -18,6 +19,8 @@ document.body.appendChild(renderer.domElement)
 // 创建父正方体
 const parentGeometry = new THREE.BoxGeometry(1, 1, 1)
 const parentMaterial = new THREE.MeshBasicMaterial({ color: 0x0000ff })
+// 启用线框模式
+parentMaterial.wireframe = true
 const parentCube = new THREE.Mesh(parentGeometry, parentMaterial)
 
 parentCube.position.set(-2, 0, 0)
@@ -81,31 +84,55 @@ function resizeHandle() {
 
 window.addEventListener('resize', resizeHandle)
 
-const btn = document.createElement('button')
-btn.innerHTML = '点击全屏'
-btn.style.position = 'absolute'
-btn.style.top = '20px'
-btn.style.left = '20px'
-
-function btnClickHandle() {
-    document.body.requestFullscreen().
-    then().
-    catch()
+function fullScreenHandle() {
+    document.body.requestFullscreen().then().catch(console.error)
 }
 
-btn.onclick = btnClickHandle
-document.body.appendChild(btn)
-
-// 退出全屏按钮
-const exitBtn = document.createElement('button')
-exitBtn.innerHTML = '退出全屏'
-exitBtn.style.position = 'absolute'
-exitBtn.style.top = '60px'
-exitBtn.style.left = '20px'
-
-function exitBtnClickHandle() {
-    document.exitFullscreen().then().catch()
+function exitFullScreenHandle() {
+    document.exitFullscreen().then().catch(console.error)
 }
 
-exitBtn.onclick = exitBtnClickHandle
-document.body.appendChild(exitBtn)
+let eventObj = {
+    fullScreen: fullScreenHandle,
+    exitFullScreen: exitFullScreenHandle,
+}
+
+// 创建GUI
+const gui = new GUI()
+// 第1个参数是对象 第2个参数是对象中的属性名称 如果属性是一个方法 那么这个控件就是一个按钮
+// name方法是给控件添加一个名字 这个名字就是按钮的文本内容
+// gui.add(eventObj, 'fullScreen').name('全屏')
+// gui.add(eventObj, 'exitFullScreen').name('退出全屏')
+
+// 创建分组
+const folder = gui.addFolder('立方体位置控制')
+// 默认打开分组
+folder.open()
+
+// 控制立方体在3个轴上的位置
+// 数值类的属性 则在GUI上的表现是一个滑动条
+folder.add(sonCube.position, 'x').min(-10).max(10).step(0.1).name('子立方体X位置').onChange(changeValueHandle)
+folder.add(sonCube.position, 'y').min(-8).max(8).step(0.2).name('子立方体Y位置').onFinishChange(changeValueFinishHandle)
+folder.add(sonCube.position, 'z').min(-6).max(6).step(0.3).name('子立方体Z位置').onChange(changeValueHandle)
+
+function changeValueHandle(value) {
+    console.log("拖动了滑动条")
+    console.log(value)
+}
+
+function changeValueFinishHandle(value) {
+    console.log("停止拖动了")
+    console.log(value)
+}
+
+// 布尔值类型的属性 在GUI上表现为一个单选框
+gui.add(parentMaterial, 'wireframe').name('父立方体材质是否启用线框模式')
+
+const sonCubeColor = {
+    color: 0x00ff00,
+}
+
+// 颜色类型的属性 在GUI上表现为一个颜色选择器
+gui.addColor(sonCubeColor, 'color').name('子立方体颜色').onChange((value) => {
+    sonMaterial.color.set(value)
+})
