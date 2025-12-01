@@ -16,10 +16,31 @@ const renderer = new THREE.WebGLRenderer()
 renderer.setSize(window.innerWidth, window.innerHeight)
 document.body.appendChild(renderer.domElement)
 
-let geometry = new THREE.ConeGeometry(1, 2, 32, 1, false, 0, Math.PI * 2)
-const material = new THREE.MeshBasicMaterial({ color: 0xffff00, wireframe: true, side: THREE.DoubleSide })
-const cone = new THREE.Mesh(geometry, material)
-scene.add(cone)
+// 创建平面几何体
+let planeGeometry = new THREE.PlaneGeometry(1, 1)
+
+// 创建纹理加载器
+const textureLoader = new THREE.TextureLoader()
+const texture = textureLoader.load('../assets/CityNewYork002_COL_VAR1_1K.png')
+
+// 加载环境遮罩贴图(aoMap)
+const aoMapTexture = textureLoader.load('../assets/CityNewYork002_AO_1K.jpg')
+
+// 创建材质
+const materialParams = {
+    color: new THREE.Color(0xffffff),
+    // 指定纹理
+    map: texture,
+    // 允许透明
+    transparent: true,
+    // 设置环境遮罩贴图
+    aoMap: aoMapTexture,
+}
+
+// 使用基础材质
+let planeMaterial = new THREE.MeshBasicMaterial(materialParams)
+let plane = new THREE.Mesh(planeGeometry, planeMaterial)
+scene.add(plane)
 
 camera.position.x = 2
 camera.position.y = 2
@@ -41,59 +62,7 @@ function animate() {
 
 animate()
 
-// 监听窗口变化
-function resizeHandle() {
-    // 重置渲染器宽高比
-    renderer.setSize(window.innerWidth, window.innerHeight)
-
-    // 重置相机宽高比(就是创建相机对象时的第2个参数)
-    camera.aspect = window.innerWidth / window.innerHeight
-
-    // 更新相机投影矩阵
-    camera.updateProjectionMatrix()
-}
-
-window.addEventListener('resize', resizeHandle)
-
-function fullScreenHandle() {
-    document.body.requestFullscreen().then().catch(console.error)
-}
-
-function exitFullScreenHandle() {
-    document.exitFullscreen().then().catch(console.error)
-}
-
-let eventObj = {
-    fullScreen: fullScreenHandle,
-    exitFullScreen: exitFullScreenHandle,
-}
-
 // 创建GUI
 const gui = new GUI()
-
-gui.add(geometry.parameters, 'radialSegments').min(1).max(128).step(1).name('圆的多边形数量').onChange((value) => {
-    let newGeometry = new THREE.ConeGeometry(1, 2, value, geometry.parameters.heightSegments, geometry.parameters.openEnded, 0, Math.PI * 2)
-
-    // 释放旧的几何体并替换
-    cone.geometry.dispose()
-    cone.geometry = newGeometry
-    geometry = newGeometry
-})
-
-gui.add(geometry.parameters, 'heightSegments').min(1).max(128).step(1).name('高的多边形数量').onChange((value) => {
-    let newGeometry = new THREE.ConeGeometry(1, 2, geometry.parameters.radialSegments, value, geometry.parameters.openEnded, 0, Math.PI * 2)
-
-    // 释放旧的几何体并替换
-    cone.geometry.dispose()
-    cone.geometry = newGeometry
-    geometry = newGeometry
-})
-
-gui.add(geometry.parameters, 'openEnded').name('是否开口').onChange((value) => {
-    let newGeometry = new THREE.ConeGeometry(1, 2, geometry.parameters.radialSegments, geometry.parameters.heightSegments, value, 0, Math.PI * 2)
-
-    // 释放旧的几何体并替换
-    cone.geometry.dispose()
-    cone.geometry = newGeometry
-    geometry = newGeometry
-})
+// 环境遮罩强度越强,则环境光遮蔽效果越明显
+gui.add(planeMaterial, 'aoMapIntensity').min(0).max(1).step(0.1).name('环境遮罩强度')
